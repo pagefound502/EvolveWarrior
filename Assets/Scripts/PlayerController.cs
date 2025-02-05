@@ -135,7 +135,6 @@ public class PlayerController : MonoBehaviour
                 enemy.TakeDamage(currentAttackDamage);
                 if (Random.Range(0,100)<=knockBackForce)
                 {
-                    enemy.KnockBack(hitPosition,knockBackForce,knockBackTime);
                     Debug.Log("Knock=" + enemy.name);
                 }
                 Debug.Log("Attacked=" + enemy.name);

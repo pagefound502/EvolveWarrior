@@ -58,9 +58,7 @@ public class EnemySpawnManager : MonoBehaviour
         enemyObject.SetActive(true); // Görünür yap
         enemyObject.transform.position = GetSpawnPosition(); // Rastgele bir konum ayarla
         EnemyController enemyComponent = enemyObject.GetComponent<EnemyController>();
-        enemyComponent.enemyStateCurrent = EnemyController.EnemyState.Walk;
         enemyComponent.player = playerTransform;
-        enemyComponent.EnemySpawned();
     }
 
     private GameObject GetPooledEnemy(string enemyTypeName)
@@ -69,10 +67,6 @@ public class EnemySpawnManager : MonoBehaviour
         {
             foreach (GameObject enemy in enemyPools[enemyTypeName])
             {
-                if (!enemy.activeInHierarchy&&enemy.GetComponent<EnemyController>().isUsable)
-                {
-                    return enemy;
-                }
             }
         }
         return null;
