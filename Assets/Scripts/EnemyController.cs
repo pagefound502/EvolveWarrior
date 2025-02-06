@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.XR;
 using static UnityEngine.Rendering.DebugUI;
+
 
 public class BaseEnemy
 {
@@ -32,19 +34,22 @@ public class BaseEnemy
 
     }
 }
+
+
+
 public class EnemyController : MonoBehaviour,IBaseEnemy
 {
+    public BaseEnemyStatsInfo enemyStatsScriptableObject;
+
     public Animator _anim;
-    public Transform player;
+    public Transform playerTransform;
     public BaseEnemy currentEnemyInfo = new BaseEnemy();
 
     //[Header("Enemy StatsDefault")]
 
 
-
-
-
     public float currentHealth;
+    public bool currentStun = false;
     public float armor;
     public float moveSpeed;
     public float attackDamage;
@@ -52,14 +57,15 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
     public float attackSpeed;
     public float expReward;
 
-
+    private bool attackAviable = true;
     private bool isDead = false;
     private float nextAttackTime = 0f;
-    Rigidbody2D rb; // Rigidbody referansý
+    public Rigidbody2D rb; // Rigidbody referansý
 
 
     public enum EnemyState
     {
+        Empty,
         Create,
         Spawn,
         DeSpawn,
@@ -73,17 +79,23 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
 
     public EnemyState enemyStateCurrent;
 
+    void Start()
+    {
+        //First value initialize
+       
+    }
 
     void FixedUpdate()
     {
 
-        if (enemyStateCurrent==EnemyState.DeSpawn) return;
-
+        if ((enemyStateCurrent==EnemyState.Empty)) return;
         switch (enemyStateCurrent)
         {
             case EnemyState.Create:
                 Console.WriteLine("Düþam statlarý yeniden oluþturuldu ama dünyaya eklenmedi");
-                return;
+                Create(enemyStatsScriptableObject);
+                gameObject.SetActive(false);
+                enemyStateCurrent = EnemyState.Empty;
                 break;
 
             case EnemyState.Spawn:
@@ -93,23 +105,60 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
                 DeSpawn();
                 break;
             case EnemyState.Die:
-                Die();
+                if (isDead == true)
+                {
+                    enemyStateCurrent = EnemyState.DeSpawn;
+                }
                 break;
+
             case EnemyState.Stun:
-                // Stun animasyonu oynatýlýyor, süre sonunda baþka duruma geçecek.
+                if (currentStun)
+                {
+                    break;
+                }
+                else
+                {
+                    enemyStateCurrent = EnemyState.Idle;
+                }
                 break;
 
             case EnemyState.Knockback:
                 // Knockback kuvveti uygulanýyor.
                 break;
             case EnemyState.Idle:
-                
+                //yaþýyorsa takip et
+                if(!GameManagerCustom.playerIsDeath)
+                {
+                    enemyStateCurrent=EnemyState.Follow;
+                    break;
+                }
                 break;
             case EnemyState.Follow:
-                FollowPlayer(PlayerDirection());
+                //yaþamýyorsa dur
+                if (GameManagerCustom.playerIsDeath)
+                {
+                    enemyStateCurrent = EnemyState.Idle;
+                    break;
+                }
+                if (PlayerDistance(playerTransform.position) > attackRange)
+                {
+                    FollowPlayer(PlayerDirection());
+                }
+                else
+                {
+                    enemyStateCurrent = EnemyState.Attack;
+                }
+
+
                 break;
 
             case EnemyState.Attack:
+                //yaþamýyorsa saldýrdma
+                if (GameManagerCustom.playerIsDeath)
+                {
+                    enemyStateCurrent = EnemyState.Idle;
+                    break;
+                }
                 TryAttack();
                 break;
         }
@@ -124,13 +173,14 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
     
     public Vector2 PlayerDirection()
     {
-        Vector2 direction = (player.position - transform.position).normalized;
+        Vector2 direction = (playerTransform.position - transform.position).normalized;
         return direction;
     }
 
-    public void Create(BaseEnemy baseEnemy)
+    public void Create(BaseEnemyStatsInfo enemyScriptableObject)
     {
-        currentEnemyInfo = baseEnemy;
+        currentEnemyInfo = new BaseEnemy(enemyStatsScriptableObject.maxHealthState, enemyStatsScriptableObject.armorState, enemyStatsScriptableObject.moveSpeedState, enemyStatsScriptableObject.attackDamageState, enemyStatsScriptableObject.attackRangeState, enemyStatsScriptableObject.attackSpeedState, enemyStatsScriptableObject.expRewardState);
+        //rb=gameObject.GetComponent<Rigidbody2D>();
         /*
         currentEnemyInfo.maxHealthState = maxHealthState;
         currentEnemyInfo.armorState = armorState;
@@ -152,21 +202,33 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
          attackSpeed= currentEnemyInfo.attackSpeedState;
          expReward= currentEnemyInfo.expRewardState;
          transform.position =spawnPosition;
+        playerTransform = GameManagerCustom.playerController.transform;
+         gameObject.SetActive(true);
+         isDead= false;
+         enemyStateCurrent=EnemyState.Idle;
+         ShowHp();
     }
 
     public void DeSpawn()
     {
-        throw new System.NotImplementedException();
+        enemyStateCurrent= enemyStateCurrent = EnemyState.Empty;
+        gameObject.SetActive(false);
     }
 
     public void AwardExp()
     {
-        throw new System.NotImplementedException();
+        GameManagerCustom.playerController.GainExperience(expReward);
     }
 
     public void KnowBack()
     {
         throw new System.NotImplementedException();
+    }
+
+    public void Stun()
+    {
+        if (enemyStateCurrent == EnemyState.Die) return;
+        StartCoroutine(StunEffect(3));
     }
 
     public void Walk()
@@ -176,24 +238,59 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
 
     public void TakeDamage(float damage)
     {
-        throw new System.NotImplementedException();
+        if (enemyStateCurrent == EnemyState.Die) return;
+        if(currentStun)
+        {
+            damage = damage * 2;
+        }
+        CalculateHealth(damage);
+
     }
     public void CalculateHealth(float value, bool isHeal = false)
     {
-        throw new System.NotImplementedException();
+        if(isHeal)
+        {
+            value = value * -1;
+        }
+        currentHealth = Mathf.Clamp(currentHealth - value, 0, currentEnemyInfo.maxHealthState);
+        if(currentHealth<=0)
+        {
+            Die();
+        }
     }
     public void TryAttack()
     {
-
+        if(PlayerDistance(playerTransform.position)<attackRange)
+        {
+            rb.velocity = Vector2.zero;
+            AttackDamage();
+            return;
+        }
+        else
+        {
+            enemyStateCurrent = EnemyState.Follow;
+        }
     }
     public void AttackDamage()
     {
-        throw new System.NotImplementedException();
+        if(attackAviable)
+        {
+            StartCoroutine(AttackEffect(1));
+        }
+        else
+        {
+            rb.velocity = Vector2.zero;
+            _anim.SetFloat("RunState", 0);
+        }
     }
+
 
     public void Die()
     {
-        throw new System.NotImplementedException();
+        if (isDead==false)
+        { 
+            StartCoroutine(DieEffect(1.5f));
+        }
     }
 
     public float PlayerDistance(Vector2 playerPos)
@@ -204,7 +301,45 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
     public void FollowPlayer(Vector2 targetPosNormal)
     {
         rb.velocity = targetPosNormal * moveSpeed;
-        _anim.SetBool("isMoving", true);
+        _anim.SetFloat("RunState", 0.5f);
+    }
+
+    public void ShowHp()
+    {
+        Console.WriteLine(currentHealth);
+    }
+
+
+    //
+    public IEnumerator StunEffect(float duration)
+    {
+        enemyStateCurrent=(EnemyState.Stun);
+        rb.velocity = Vector2.zero; // Hareketi durdur
+        _anim.SetFloat("RunState", 1f); // Stun animasyonunu kapat
+        currentStun = true;
+        yield return new WaitForSeconds(duration); // Belirtilen süre kadar bekle
+
+        _anim.SetFloat("RunState", 0f); // Stun animasyonunu kapat
+        currentStun = false;
+    }
+    public IEnumerator DieEffect(float duration)
+    {
+        //enemyStateCurrent = (EnemyState.Stun);
+        rb.velocity = Vector2.zero; // Hareketi durdur
+        _anim.SetTrigger("Die"); // Stun animasyonu çalýþtýr
+        isDead = true;
+        yield return new WaitForSeconds(duration); // Belirtilen süre kadar bekle
+        enemyStateCurrent= (EnemyState.Die);
+
+    }
+    public IEnumerator AttackEffect(float duration)
+    {
+        enemyStateCurrent = (EnemyState.Stun);
+        _anim.SetTrigger("Attack"); // Stun animasyonunu kapat
+        attackAviable = false;
+        GameManagerCustom.playerController.TakeDamage(attackDamage);
+        yield return new WaitForSeconds(duration); // Belirtilen süre kadar bekle
+        attackAviable = true;
     }
 
 

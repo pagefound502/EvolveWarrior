@@ -31,7 +31,8 @@ public class EnemySpawnManager : MonoBehaviour
             for (int i = 0; i < enemys.initialPoolSize; i++)
             {
                 GameObject enemyObject = Instantiate(enemys.prefab);
-                enemyObject.SetActive(false); // Ýlk baþta görünmez yap
+                EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
+                enemyController.enemyStateCurrent = EnemyController.EnemyState.Create;
                 pool.Add(enemyObject);
             }
 
@@ -54,11 +55,7 @@ public class EnemySpawnManager : MonoBehaviour
             enemyObject = Instantiate(randomEnemyType.prefab);
             enemyPools[randomEnemyType.name].Add(enemyObject);
         }
-
-        enemyObject.SetActive(true); // Görünür yap
-        enemyObject.transform.position = GetSpawnPosition(); // Rastgele bir konum ayarla
-        EnemyController enemyComponent = enemyObject.GetComponent<EnemyController>();
-        enemyComponent.player = playerTransform;
+        enemyObject.GetComponent<IBaseEnemy>().Spawn(GetSpawnPosition());
     }
 
     private GameObject GetPooledEnemy(string enemyTypeName)

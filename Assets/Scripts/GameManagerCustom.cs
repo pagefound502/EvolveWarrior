@@ -8,7 +8,7 @@ public class GameManagerCustom : MonoBehaviour
 {
 
     public GameObject playerPrefab;
-
+    public static PlayerController playerController;
     public Transform playerSpawnPosition;
 
     public  Image healthImage;
@@ -29,12 +29,12 @@ public class GameManagerCustom : MonoBehaviour
         Debug.Log("GameManagerStarted");
         currentDelay = startDelay;
         Debug.Log("PlayerSpawned");
-
         playerObject = Instantiate(playerPrefab, playerSpawnPosition);
         playerObject.GetComponent<PlayerController>().healthImage = healthImage;
         playerObject.GetComponent<PlayerController>().expImage = healthImage;
         playerObject.GetComponent<PlayerController>().SpawnPlayer();
-
+        //
+        playerController = playerObject.GetComponent<PlayerController>();
         StartCoroutine("GameStart");
     }
     public static GameObject GetPlayer()

@@ -8887,21 +8887,6 @@ MonoBehaviour:
   - name: skeleton1
     prefab: {fileID: 237567536429048964, guid: 2e43c057e34817b4fa6eeb26b5935594, type: 3}
     initialPoolSize: 10
-  - name: skeleton2
-    prefab: {fileID: 6198282042775486887, guid: f67cc23e4e8880a43ae7631b6a7533fa, type: 3}
-    initialPoolSize: 10
-  - name: skeleton3
-    prefab: {fileID: 8821041145975681684, guid: 9a0b052b71efbdc49a6a6d1055640d90, type: 3}
-    initialPoolSize: 10
-  - name: skeleton4
-    prefab: {fileID: 777685619393480124, guid: b347c6f1d94608342ae45ca2bd98a14f, type: 3}
-    initialPoolSize: 10
-  - name: skeleton5
-    prefab: {fileID: 6754446678692195979, guid: d92b75c9e036a194398fa63f86b6bb1f, type: 3}
-    initialPoolSize: 10
-  - name: skeleton6
-    prefab: {fileID: 6313888290563817257, guid: c257e5dcafe505e4ab842853310af321, type: 3}
-    initialPoolSize: 10
 --- !u!4 &1062022098
 Transform:
   m_ObjectHideFlags: 0

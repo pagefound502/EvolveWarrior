@@ -8,7 +8,7 @@ public interface IBaseEnemy :IBaseHuman
 
     public void FollowPlayer(Vector2 targetPos);
 
-    public void Create(BaseEnemy baseEnemyInfo);
+    public void Create(BaseEnemyStatsInfo baseEnemyInfo);
 
     public void Spawn(Vector2 spawnPosition);
 
