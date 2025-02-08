@@ -13,9 +13,10 @@ public interface IBaseEnemy :IBaseHuman
     public void Spawn(Vector2 spawnPosition);
 
     public void DeSpawn();
-
+    public void ChasePlayer(Vector2 targetPos);
     public void AwardExp();
-    
+
+    public void SlowAttack(float power, float duration);
     public void KnockBack(Vector2 direction,float power, float knockbackTime);
     public float PlayerDistance(Vector2 playerPos);
 

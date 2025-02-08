@@ -35,6 +35,8 @@ public class PlayerController : MonoBehaviour
 
     public float stunChance=50;
 
+    public float slowChance = 100;
+
     public float knockBackChance;
     public float knockBackForce; // Geri itme kuvveti
     public float knockBackTime; // Geri itme kuvveti
@@ -141,6 +143,10 @@ public class PlayerController : MonoBehaviour
                     print("stunde");
                     //enemy.Stun();
                     enemy.Stun();
+                }
+                if (Random.Range(0,100)<=slowChance)
+                {
+                    enemy.SlowAttack(5, 5);
                 }
                 Debug.Log("Attacked=" + enemy.name);
             }

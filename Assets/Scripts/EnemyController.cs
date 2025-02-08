@@ -43,7 +43,11 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
     public Transform playerTransform;
     public BaseEnemy currentEnemyInfo = new BaseEnemy();
 
+
     //[Header("Enemy StatsDefault")]
+
+    public Animator _HitAnim;
+
 
 
     public float currentHealth;
@@ -58,6 +62,7 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
     private bool attackAviable = true;
     private bool isDead = false;
     private bool isKnockback = false;
+    private bool isSlowEffect = false;
     private float nextAttackTime = 0f;
     public Rigidbody2D rb; // Rigidbody referansý
 
@@ -212,6 +217,7 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
          attackAviable = true;
          isStun = false;
          isKnockback = false;
+         isSlowEffect = false;
          ShowHp();
     }
 
@@ -264,6 +270,7 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
         {
             damage = damage * 2;
         }
+        _HitAnim.SetTrigger("AttackEffectT");
         CalculateHealth(damage);
 
     }
@@ -328,6 +335,21 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
     {
         rb.velocity = targetPosNormal * moveSpeed;
         _anim.SetFloat("RunState", 0.5f);
+        ChasePlayer(PlayerDirection());
+    }
+
+    public void ChasePlayer(Vector2 targetPos)
+    {
+        if (targetPos.x > 0)
+        {
+            transform.rotation = Quaternion.Euler(0,180,0);
+            //transform.localScale = new Vector3(transform.localScale.x*-1, transform.localScale.y, transform.localScale.z);  // Saða bak
+        }
+        else if (targetPos.x <= 0)
+        {
+            transform.rotation = Quaternion.Euler(0, 0, 0);
+            //transform.localScale = new Vector3(transform.localScale.x * 1, transform.localScale.y, transform.localScale.z);  // Saða bak
+        }
     }
 
     public void ShowHp()
@@ -335,20 +357,26 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
         Console.WriteLine(currentHealth);
     }
     //
-    public IEnumerator StunEffect(float duration)
+
+
+    public void SlowAttack(float power, float duration)
     {
-        enemyStateCurrent=(EnemyState.Stun);
-        rb.velocity = Vector2.zero; // Hareketi durdur
-        _anim.SetFloat("RunState", 1f); // Stun animasyonunu kapat
-        isStun = true;
-        attackAviable = false;
-        yield return new WaitForSeconds(duration); // Belirtilen süre kadar bekle
-        attackAviable = true;
-        isStun = false;
-        _anim.SetFloat("RunState", 0f); // Stun animasyonunu kapat
-        
+        if(!isSlowEffect &&!isDead)
+        {
+            StartCoroutine(SlowEffect(power, duration));
+        }
     }
-    public IEnumerator DieEffect(float duration)
+     IEnumerator SlowEffect(float power, float duration)
+    {
+        moveSpeed = moveSpeed/power;
+        isSlowEffect = true;
+        yield return new WaitForSeconds(duration);
+        moveSpeed = currentEnemyInfo.moveSpeedState;
+        isSlowEffect = false;
+    }
+
+
+     IEnumerator DieEffect(float duration)
     {
         //enemyStateCurrent = (EnemyState.Stun);
         rb.velocity = Vector2.zero; // Hareketi durdur
@@ -359,7 +387,7 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
         enemyStateCurrent= (EnemyState.Die);
 
     }
-    public IEnumerator AttackEffect(float duration)
+     IEnumerator AttackEffect(float duration)
     {
         enemyStateCurrent = (EnemyState.Stun);
         _anim.SetTrigger("Attack"); // Stun animasyonunu kapat
@@ -369,7 +397,7 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
         attackAviable = true;
     }
 
-    public IEnumerator KnockbackEffect(float duration)
+     IEnumerator KnockbackEffect(float duration)
     {
         enemyStateCurrent = (EnemyState.Knockback);
         isKnockback = true;
@@ -378,6 +406,18 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
 
         enemyStateCurrent = EnemyState.Idle;
         isKnockback = false;
+    }
+    IEnumerator StunEffect(float duration)
+    {
+        enemyStateCurrent = (EnemyState.Stun);
+        rb.velocity = Vector2.zero; // Hareketi durdur
+        _anim.SetFloat("RunState", 1f); // Stun animasyonunu kapat
+        isStun = true;
+        attackAviable = false;
+        yield return new WaitForSeconds(duration); // Belirtilen süre kadar bekle
+        attackAviable = true;
+        isStun = false;
+        _anim.SetFloat("RunState", 0f); // Stun animasyonunu kapat
     }
 
 }
