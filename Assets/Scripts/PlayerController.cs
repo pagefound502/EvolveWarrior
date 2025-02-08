@@ -7,21 +7,18 @@ public class PlayerController : MonoBehaviour
 {
     public Image healthImage;
     public Image expImage;
-
     // Temel özellikler
     public float health;       // Can miktarý
     public float attackSpeed;// Saldýrý hýzý
     public int mana;         // Mana miktarý
     public int attackDamage;  // Saldýrý gücü
     public float moveSpeed;   // Hareket hýzý
-    
     // Ek özellikler
     public int level = 1;          // Karakter seviyesi
     public float experience = 0;     // Deneyim puaný
     public float experienceToNextLevel = 100;
     public float expBost = 100;
     public float money = 0;          // Para miktarý
-
     private float nextAttackTime = 0f;
 
     public Animator _anim;        // Animator bileþeni referansý
@@ -36,7 +33,7 @@ public class PlayerController : MonoBehaviour
     private float currentMoveSpeed;   // Hareket hýzý
 
 
-
+    public float stunChance=50;
 
     public float knockBackChance;
     public float knockBackForce; // Geri itme kuvveti
@@ -45,7 +42,7 @@ public class PlayerController : MonoBehaviour
     public LayerMask enemyLayer;  // Düþmanlarý belirlemek için Layer Mask
 
     //
-    
+
 
     public void SpawnPlayer()
     {
@@ -131,11 +128,19 @@ public class PlayerController : MonoBehaviour
             if (enemy != null)
             {
                 // Düþmana geri itme uygula
-                Vector3 hitPosition = transform.position; // Oyuncunun pozisyonu
+                Vector3 hitPosition = enemy.transform.position- transform.position; // Oyuncunun pozisyonu
                 enemy.TakeDamage(currentAttackDamage);
-                if (Random.Range(0,100)<=knockBackForce)
+                if (Random.Range(0,100)<=knockBackChance)
                 {
-                    Debug.Log("Knock=" + enemy.name);
+                    //enemy.Stun();
+                    enemy.KnockBack(hitPosition,3,1f);
+                    print("knock");
+                }
+                if (Random.Range(0, 100) <= stunChance)
+                {
+                    print("stunde");
+                    //enemy.Stun();
+                    enemy.Stun();
                 }
                 Debug.Log("Attacked=" + enemy.name);
             }

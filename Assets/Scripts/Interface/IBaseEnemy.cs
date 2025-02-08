@@ -16,7 +16,7 @@ public interface IBaseEnemy :IBaseHuman
 
     public void AwardExp();
     
-    public void KnowBack();
+    public void KnockBack(Vector2 direction,float power, float knockbackTime);
     public float PlayerDistance(Vector2 playerPos);
 
 }

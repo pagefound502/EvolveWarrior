@@ -9,8 +9,6 @@ using static UnityEngine.Rendering.DebugUI;
 
 public class BaseEnemy
 {
-
-
     public float maxHealthState = 100f;
     public float armorState = 5f;
     public float moveSpeedState = 3f;
@@ -49,7 +47,7 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
 
 
     public float currentHealth;
-    public bool currentStun = false;
+    private bool isStun = false;
     public float armor;
     public float moveSpeed;
     public float attackDamage;
@@ -59,6 +57,7 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
 
     private bool attackAviable = true;
     private bool isDead = false;
+    private bool isKnockback = false;
     private float nextAttackTime = 0f;
     public Rigidbody2D rb; // Rigidbody referansý
 
@@ -112,7 +111,9 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
                 break;
 
             case EnemyState.Stun:
-                if (currentStun)
+                if (isDead) return;
+
+                if (isStun)
                 {
                     break;
                 }
@@ -140,6 +141,8 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
                     enemyStateCurrent = EnemyState.Idle;
                     break;
                 }
+                if (enemyStateCurrent == EnemyState.Stun || isDead==true) return;
+
                 if (PlayerDistance(playerTransform.position) > attackRange)
                 {
                     FollowPlayer(PlayerDirection());
@@ -202,10 +205,13 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
          attackSpeed= currentEnemyInfo.attackSpeedState;
          expReward= currentEnemyInfo.expRewardState;
          transform.position =spawnPosition;
-        playerTransform = GameManagerCustom.playerController.transform;
+         playerTransform = GameManagerCustom.playerController.transform;
          gameObject.SetActive(true);
          isDead= false;
          enemyStateCurrent=EnemyState.Idle;
+         attackAviable = true;
+         isStun = false;
+         isKnockback = false;
          ShowHp();
     }
 
@@ -220,15 +226,30 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
         GameManagerCustom.playerController.GainExperience(expReward);
     }
 
-    public void KnowBack()
+    public void KnockBack(Vector2 direction,float knocbackForce,float knockbackTime)
     {
-        throw new System.NotImplementedException();
+        if(isDead)
+        {
+            return;
+        }
+
+        if (isKnockback == false)
+        {
+            rb.velocity = Vector2.zero;
+            rb.AddForce(direction.normalized * knocbackForce, ForceMode2D.Impulse);
+            StartCoroutine(KnockbackEffect(knockbackTime));
+        }
     }
 
     public void Stun()
     {
-        if (enemyStateCurrent == EnemyState.Die) return;
-        StartCoroutine(StunEffect(3));
+        if (isDead) return;
+        if (isStun == false)
+        {
+
+            //stundayken tekrar stun atamazsýn
+            StartCoroutine(StunEffect(3));
+        }
     }
 
     public void Walk()
@@ -238,8 +259,8 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
 
     public void TakeDamage(float damage)
     {
-        if (enemyStateCurrent == EnemyState.Die) return;
-        if(currentStun)
+        if(isDead) return;
+        if(isStun)
         {
             damage = damage * 2;
         }
@@ -260,7 +281,11 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
     }
     public void TryAttack()
     {
-        if(PlayerDistance(playerTransform.position)<attackRange)
+        if (isDead)
+        {
+            return;
+        }
+        if (PlayerDistance(playerTransform.position)<attackRange)
         {
             rb.velocity = Vector2.zero;
             AttackDamage();
@@ -288,7 +313,8 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
     public void Die()
     {
         if (isDead==false)
-        { 
+        {
+            rb.velocity = Vector2.zero;
             StartCoroutine(DieEffect(1.5f));
         }
     }
@@ -308,19 +334,19 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
     {
         Console.WriteLine(currentHealth);
     }
-
-
     //
     public IEnumerator StunEffect(float duration)
     {
         enemyStateCurrent=(EnemyState.Stun);
         rb.velocity = Vector2.zero; // Hareketi durdur
         _anim.SetFloat("RunState", 1f); // Stun animasyonunu kapat
-        currentStun = true;
+        isStun = true;
+        attackAviable = false;
         yield return new WaitForSeconds(duration); // Belirtilen süre kadar bekle
-
+        attackAviable = true;
+        isStun = false;
         _anim.SetFloat("RunState", 0f); // Stun animasyonunu kapat
-        currentStun = false;
+        
     }
     public IEnumerator DieEffect(float duration)
     {
@@ -328,6 +354,7 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
         rb.velocity = Vector2.zero; // Hareketi durdur
         _anim.SetTrigger("Die"); // Stun animasyonu çalýþtýr
         isDead = true;
+        attackAviable = false;
         yield return new WaitForSeconds(duration); // Belirtilen süre kadar bekle
         enemyStateCurrent= (EnemyState.Die);
 
@@ -342,6 +369,15 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
         attackAviable = true;
     }
 
+    public IEnumerator KnockbackEffect(float duration)
+    {
+        enemyStateCurrent = (EnemyState.Knockback);
+        isKnockback = true;
+        _anim.SetFloat("RunState", 1f);
+        yield return new WaitForSeconds(duration); // Belirtilen süre kadar bekle
 
+        enemyStateCurrent = EnemyState.Idle;
+        isKnockback = false;
+    }
 
 }

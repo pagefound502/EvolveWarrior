@@ -456,7 +456,7 @@ MonoBehaviour:
   health: 300
   attackSpeed: 4
   mana: 50
-  attackDamage: 100
+  attackDamage: 5
   moveSpeed: 4
   level: 1
   experience: 0

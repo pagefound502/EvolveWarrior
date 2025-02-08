@@ -35,6 +35,10 @@ public class GameManagerCustom : MonoBehaviour
         playerObject.GetComponent<PlayerController>().SpawnPlayer();
         //
         playerController = playerObject.GetComponent<PlayerController>();
+
+
+
+
         StartCoroutine("GameStart");
     }
     public static GameObject GetPlayer()
@@ -60,6 +64,15 @@ public class GameManagerCustom : MonoBehaviour
         else
         {
             StartCoroutine("GameStart");
+        }
+    }
+    private void Update()
+    {
+
+        if (Input.GetKeyDown(KeyCode.Keypad9))
+        {
+            playerObject.GetComponent<PlayerController>().SpawnPlayer();
+            return;
         }
     }
 
