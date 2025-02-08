@@ -146,7 +146,7 @@ public class PlayerController : MonoBehaviour
                 }
                 if (Random.Range(0,100)<=slowChance)
                 {
-                    enemy.SlowAttack(5, 5);
+                    enemy.SlowAttack(10, 2);
                 }
                 Debug.Log("Attacked=" + enemy.name);
             }

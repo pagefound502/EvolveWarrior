@@ -368,7 +368,12 @@ public class EnemyController : MonoBehaviour,IBaseEnemy
     }
      IEnumerator SlowEffect(float power, float duration)
     {
-        moveSpeed = moveSpeed/power;
+        if(power==0)
+        {
+            power = 0.5f;
+        }
+        moveSpeed = Mathf.Clamp(moveSpeed/power,0.1f,moveSpeed);
+
         isSlowEffect = true;
         yield return new WaitForSeconds(duration);
         moveSpeed = currentEnemyInfo.moveSpeedState;
