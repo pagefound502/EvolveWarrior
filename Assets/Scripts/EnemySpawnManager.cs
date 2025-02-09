@@ -32,7 +32,7 @@ public class EnemySpawnManager : MonoBehaviour
             {
                 GameObject enemyObject = Instantiate(enemys.prefab);
                 EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
-                enemyController.enemyStateCurrent = EnemyController.EnemyState.Create;
+                enemyController.Create(enemyController.enemyStatsScriptableObject);
                 pool.Add(enemyObject);
             }
 
@@ -53,6 +53,8 @@ public class EnemySpawnManager : MonoBehaviour
         {
             // Eðer havuzda uygun düþman yoksa yeni bir düþman oluþtur
             enemyObject = Instantiate(randomEnemyType.prefab);
+            EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
+            enemyController.Create(enemyController.enemyStatsScriptableObject);
             enemyPools[randomEnemyType.name].Add(enemyObject);
         }
         enemyObject.GetComponent<IBaseEnemy>().Spawn(GetSpawnPosition());

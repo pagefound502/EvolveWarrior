@@ -453,7 +453,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healthImage: {fileID: 0}
   expImage: {fileID: 0}
-  health: 300
+  health: 5000
   attackSpeed: 4
   mana: 50
   attackDamage: 5
@@ -464,10 +464,12 @@ MonoBehaviour:
   expBost: 100
   money: 0
   _anim: {fileID: 845124658313966146}
-  knockBackChance: 150
+  stunChance: 50
+  slowChance: 50
+  knockBackChance: 50
   knockBackForce: 5
   knockBackTime: 0.5
-  attackRange: 5
+  attackRange: 2
   enemyLayer:
     serializedVersion: 2
     m_Bits: 64

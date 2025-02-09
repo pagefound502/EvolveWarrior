@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IBaseEnemy :IBaseHuman
 {
-    public Vector2 PlayerDirection();
+    public  Vector2 PlayerDirection();
 
     public void FollowPlayer(Vector2 targetPos);
 
@@ -19,5 +19,11 @@ public interface IBaseEnemy :IBaseHuman
     public void SlowAttack(float power, float duration);
     public void KnockBack(Vector2 direction,float power, float knockbackTime);
     public float PlayerDistance(Vector2 playerPos);
+
+
+    IEnumerator SlowEffect(float power, float duration);
+    IEnumerator DieEffect(float duration);
+    IEnumerator KnockbackEffect(float duration);
+    IEnumerator StunEffect(float duration);
 
 }
