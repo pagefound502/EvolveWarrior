@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class EnemySpawnManager : MonoBehaviour
 {
+    public Transform enemySpawnArea;
     Transform playerTransform;
 
     [System.Serializable]
@@ -76,7 +77,8 @@ public class EnemySpawnManager : MonoBehaviour
         // Düþmaný rastgele bir konuma yerleþtir (örnek bir spawn mantýðý)
         float randomX = Random.Range(-10f, 10f);
         float randomY = Random.Range(-10f, 10f);
-        return new Vector3(playerTransform.position.x + randomX, playerTransform.position.y + randomY, 0);
+        return new Vector3(enemySpawnArea.position.x + randomX, enemySpawnArea.position.y + randomY, 0);
+        //alan ici olarak düzenlencek
     }
 
     public void DespawnEnemy(GameObject enemyObject)
@@ -84,4 +86,10 @@ public class EnemySpawnManager : MonoBehaviour
         enemyObject.SetActive(false); // Düþmaný havuza geri gönder
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.black;
+        Gizmos.DrawWireCube(enemySpawnArea.position, new Vector3(enemySpawnArea.position.x+10, enemySpawnArea.position.y+10, enemySpawnArea.position.z+10));
+        //alan ici olarak düzenlencek
+    }
 }

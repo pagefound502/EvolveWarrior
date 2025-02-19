@@ -24,7 +24,7 @@ public class GameManagerCustom : MonoBehaviour
     int currentDelay;
 
 
-    void Start()
+    void Awake()
     {
         Debug.Log("GameManagerStarted");
         currentDelay = startDelay;
