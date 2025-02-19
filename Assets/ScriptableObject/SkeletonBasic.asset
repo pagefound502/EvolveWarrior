@@ -16,6 +16,6 @@ MonoBehaviour:
   armorState: 5
   moveSpeedState: 3
   attackDamageState: 5
-  attackRangeState: 2
+  attackRangeState: 0.2
   attackSpeedState: 1
   expRewardState: 50

@@ -3004,19 +3004,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67eeed7ad4d0a534082705f6e37c6093, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyStatsScriptableObject: {fileID: 0}
   _anim: {fileID: 5704065782214883508}
-  player: {fileID: 0}
-  enemyType: 1
-  maxHealth: 100
-  currentHealth: 0
-  armor: 5
-  moveSpeed: 3
-  attackDamage: 5
-  attackRange: 2
-  attackSpeed: 1
-  expReward: 50
-  isBoss: 0
-  isUsable: 1
+  playerTransform: {fileID: 0}
+  _HitAnim: {fileID: 0}
+  rb: {fileID: 0}
   enemyStateCurrent: 0
 --- !u!1 &6373447158117170618
 GameObject:
